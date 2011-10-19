@@ -14,4 +14,4 @@
 
 ## Dependences
 
-    This plugin requires **jQuery 1.6.4**, not tested in previous version.
+This plugin requires **jQuery 1.6.4**, not tested in previous version.
