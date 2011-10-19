@@ -1,7 +1,7 @@
 (function($) {
     $.fn.comicbook = function() {
         var comic_view, page_x, page_y, page_index, screen_height, screen_width,
-            page1, page2, last_scroll, canvas, context, image_original_width, 
+            page1, page2, canvas, context, image_original_width, 
             image_original_height, change_wrap, sources;
         
         sources = [
@@ -162,7 +162,7 @@
         }
 
         function nextPage() {
-            if (page_index < sources.length) {
+            if (page_index < sources.length-1) {
                 page_index += 1;
                 page1 = __getPage(page_index);
                 moveToTop();
@@ -193,7 +193,7 @@
             else if (mode == 'double') { alert('double'); }
         }
 
-        function setZoomMode(mode) {
+        function setZoomMode(mode) {    
             if (mode == 'horizontal') { 
                 zoom_mode = 'horizontal';
             } else if (mode == 'vertical') { 
