@@ -1,0 +1,32 @@
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0px;
+}
+
+#comicmenu {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    z-index: 99;
+
+    background: #3e3e3e;
+    filter:alpha(opacity=90); 
+    -moz-opacity: 0.9; 
+    opacity: 0.9;
+}
+#comicmenu img {
+    width:50px;
+}
+ul.comicmenu {
+    display: inline;
+    margin:0px;
+    padding:0px;
+}
+ul.comicmenu li {
+    list-style:none;
+    display: inline;
+}
