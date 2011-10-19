@@ -20,6 +20,7 @@ html, body {
 }
 #comicmenu img {
     width:50px;
+    border:none;
 }
 ul.comicmenu {
     display: inline;
@@ -28,5 +29,5 @@ ul.comicmenu {
 }
 ul.comicmenu li {
     list-style:none;
-    display: inline;
+    display: block;
 }

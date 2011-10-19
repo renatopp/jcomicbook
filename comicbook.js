@@ -2,7 +2,7 @@
     $.fn.comicbook = function() {
         var comic_view, page_x, page_y, page_index, screen_height, screen_width,
             page1, page2, canvas, context, image_original_width, 
-            image_original_height, change_wrap, sources;
+            image_original_height, change_wrap, sources, image_width, image_height;
         
         sources = [
             "hellblazer/Hellblazer_001-01.jpg",
@@ -14,8 +14,8 @@
         page_x = 0;
         page_y = 0;
         page_index = 0;
-        screen_height = $(window).height();
-        screen_width = $(window).width();
+        screen_height = $(window).height()-5;
+        screen_width = $(window).width()-5;
         display_mode = 'single';
         zoom_mode = 'origin';
         zoom_factor = 1;
@@ -25,23 +25,22 @@
         context = canvas.getContext('2d');
 
         function init() {
-            $(document).bind('keydown', __keyboard_event_dispatch);
-            //comic_view.bind('scroll', __scroll_event_dispatch);
-            window.addEventListener('DOMMouseScroll', __scroll_event_dispatch, false);
-            window.onmousewheel = __scroll_event_dispatch;
+            //comic_view.bind('scroll', __scrollEventDispatch);
+            $(document).bind('keydown', __keyboardEventDispatch);
+            window.addEventListener('DOMMouseScroll', __scrollEventDispatch, false);
+            window.onmousewheel = __scrollEventDispatch;
 
             page1 = __getPage(0);
             __update();
-            page_x = __get_center_x(page1);
             __draw();
         }
 
-        function __keyboard_event_dispatch(event) { 
+        function __keyboardEventDispatch(event) { 
             //alert(event.type + ': ' + event.which);
             if (event.which == 38) { rollUp(250); } // <UP>
             else if (event.which == 40) { rollDown(250); } // <DOWN>
-            else if (event.which == 32) { moveToBottom(); }
-            else if (event.which == 36) { firstPage(); } // HOME
+            else if (event.which == 32) { moveToBottom(true); }
+            else if (event.which == 36) { firstPage(true); } // HOME
             else if (event.which == 35) { lastPage(); } // END
             else if (event.which == 33) { previousPage(); } // PG UP
             else if (event.which == 34) { nextPage(); } // PG DOWN
@@ -56,7 +55,7 @@
             __draw();
         }
 
-        function __scroll_event_dispatch(event) {
+        function __scrollEventDispatch(event) {
             if (!event)
                 event = window.event;
 
@@ -75,30 +74,75 @@
         }
         
         function __update() {
-            screen_height = $(window).height();
-            screen_width = $(window).width();
-            context.canvas.width = screen_width-17;
-            context.canvas.height = screen_height-5;
+            screen_height = $(window).height()-5;
+            screen_width = $(window).width()-5;
+            context.canvas.width = screen_width;
+            context.canvas.height = screen_height;
         }
 
         function __draw() {
-            context.drawImage(page1, page_x, page_y);
+            context.drawImage(page1, page_x, page_y, image_width, image_height);
+        }
+
+        function __drawFirst(page) {
+            image_original_width = page.width;
+            image_original_height = page.height;
+
+            if (zoom_mode == 'horizontal')
+                __resizeByWidth(screen_width);
+            else if (zoom_mode == 'vertical')
+                __resizeByHeight(screen_height);
+            //else if (zoom_mode == 'manual')
+            else if (zoom_mode == 'origin')
+                // image_width = width;
+                // image_height = height;
+                __resize(image_original_width, image_original_height);
+
+            __draw();
         }
         
-        function __resize() {}
+        function __resizeByWidth(width) {
+            factor = width/image_original_width;
+            height = image_original_height*factor;
+            image_width = width;
+            image_height = height;
+            page_x = __getCenterX();
+            //page_y = __getCenterY();
+        }
 
-        function __get_center_x(page) {
-            return (screen_width/2) - (page.width/2);
+        function __resizeByHeight(height) {
+            factor = height/image_original_height;
+            width = image_original_width*factor;
+            image_width = width;
+            image_height = height;
+            page_x = __getCenterX();
+            page_y = __getCenterY();
+        }
+
+        function __resizeByFactor(factor) {
+            image_width *= factor;
+            image_height *= factor;
+        }
+
+        function __resize(width, height) {
+            image_width = width;
+            image_height = height;
+            page_x = __getCenterX();
+            //page_y = __getCenterY();
+        }
+
+        function __getCenterX() {
+            return (screen_width/2) - (image_width/2);
+        }
+
+        function __getCenterY() {
+            return (screen_height/2) - (image_height/2);
         }
         
         function __getPage(index) {
             var page = new Image();
             page.src = sources[index]
-            page.onload = function() { __draw(); };
-
-            image_original_width = page.width;
-            image_original_height = page.height;
-
+            page.onload = function() { __drawFirst(page); };
             return page;
         }
 
@@ -107,22 +151,22 @@
         }
 
         function isBottom() {
-            return page_y == (screen_height-page1.height)
+            return page_y == (screen_height-image_height)
         }
 
-        function moveToTop() {
-            if (isTop()) {
+        function moveToTop(change_page) {
+            if (change_page && isTop()) {
                 previousPage();
             } else {
                 page_y = 0;
             }
         }
 
-        function moveToBottom() {
-            if (isBottom()) {
+        function moveToBottom(change_page) {
+            if (change_page && isBottom()) {
                 nextPage();
             } else {
-                page_y = (screen_height-page1.height);
+                page_y = (screen_height-image_height);
             }
         }
         
@@ -155,8 +199,8 @@
                 change_wrap = false;
 
                 page_y -= delta;
-                if (page_y+page1.height < screen_height) {
-                    page_y = (screen_height-page1.height);
+                if (page_y+image_height < screen_height) {
+                    page_y = (screen_height-image_height);
                 }
             }
         }
@@ -196,17 +240,35 @@
         function setZoomMode(mode) {    
             if (mode == 'horizontal') { 
                 zoom_mode = 'horizontal';
+                zoom_factor = 1;
+                __resizeByWidth(screen_width);
+                moveToTop();
             } else if (mode == 'vertical') { 
                 zoom_mode = 'vertical';
+                zoom_factor = 1;
+                __resizeByHeight(screen_height);
+                moveToTop();
             } else if (mode == 'manual') { 
                 zoom_mode = 'manual';
             } else if (mode == 'origin') { 
                 zoom_mode = 'origin';
+                zoom_factor = 1;
+                __resize(image_original_width, image_original_height);
+                moveToTop();
             }
         }
 
-        function zoomIn() { alert('zoom in'); }
-        function zoomOut() { alert('zoom out'); }
+        function zoomIn() { 
+            zoom_factor += 0.1;
+            setZoomMode('manual');
+            __resizeByFactor(zoom_factor);
+        }
+
+        function zoomOut() {
+            zoom_factor -= 0.1;
+            setZoomMode('manual');
+            __resizeByFactor(zoom_factor);
+        }
 
 
         init();
