@@ -1,21 +1,28 @@
 (function($) {
-    $.fn.comicbook = function() {
-        var image_original_height, image_original_width, image_height, image_width;
-        var page_index, page_x, page_y, page;
-        var screen_height, screen_width;
-        var comic_view, canvas, context;
-        var display_mode, zoom_mode, zoom_factor;
-        var sources = [
-            "hellblazer/Hellblazer_001-01.jpg",
-            // "hellblazer/dual.jpg",
-            // "hellblazer/small.jpg",
-            "hellblazer/Hellblazer_001-02.jpg",
-            "hellblazer/Hellblazer_001-03.jpg"
-        ];
+    $.fn.comicbook = function(options) {
+        var settings = {
+            'page_index'       : 0,
+            'display-mode'     : 'single',
+            'zoom_mode'        : 'origin',
+            'zoom_factor'      : 1,
+            'background-color' : '#fff',
+            'sources'          : [
+                // "hellblazer/dual.jpg",
+                // "hellblazer/small.jpg",
+                "hellblazer/Hellblazer_001-01.jpg",
+                "hellblazer/Hellblazer_001-02.jpg",
+                "hellblazer/Hellblazer_001-03.jpg"],
+            'onPageChange'     : function(){},
+        };
 
-        /*var comic_view, page_x, page_y, page_index, screen_height, screen_width,
-            page1, page2, canvas, context, image_original_width, 
-            image_original_height, change_wrap, sources, image_width, image_height;*/
+        $.extend(settings, options);
+        //var data = $.extend({}, settings, options);
+        var image_original_height, image_original_width, image_height, image_width;
+        var screen_width, screen_height;
+        var page_x, page_y, page;
+        var comic_view, canvas, context;
+        
+        comic_view = this;
         canvas = document.getElementById(this.attr('id'));
         context = canvas.getContext('2d');
 
@@ -26,16 +33,14 @@
 
             page_x = 0;
             page_y = 0;
-            page_index = 0;
-            zoom_factor = 1;
             resizeWindow();
-            display_mode = 'single';
-            setZoomMode('origin');
+            setDisplayMode(settings['display_mode'])
+            setZoomMode(settings['zoom_mode']);
 
             context.canvas.width = screen_width;
             context.canvas.height = screen_height;
 
-            loadPage(page_index);
+            loadPage(settings['page_index']);
             
         }
 
@@ -90,7 +95,7 @@
         function loadPage(index) {
             resizeWindow();
             page = new Image();
-            page.src = sources[index]
+            page.src = settings['sources'][index]
             page.onload = function() {
                 image_original_height = page.height;
                 image_original_width = page.width;
@@ -99,6 +104,8 @@
                 setZoomMode();
                 draw();
             };
+
+            settings['onPageChange'](settings);
         }
 
         function getCenterX() {
@@ -167,48 +174,48 @@
             }
         }
 
-        function isFirstPage() { return page_index == 0; }
-        function isLastPage() { return page_index == sources.length-1; }
+        function isFirstPage() { return settings['page_index'] == 0; }
+        function isLastPage() { return settings['page_index'] == settings['sources'].length-1; }
 
         function previousPage() {
             if (!isFirstPage()) {
-                page_index -= 1;
-                loadPage(page_index);
+                settings['page_index'] -= 1;
+                loadPage(settings['page_index']);
                 moveToBottom();
             }
         }
         function nextPage() {
             if (!isLastPage()) {
-                page_index += 1;
-                loadPage(page_index);
+                settings['page_index'] += 1;
+                loadPage(settings['page_index']);
                 moveToTop();
             }
         }
         function firstPage() {
-            page_index = 0;
-            loadPage(page_index);
+            settings['page_index'] = 0;
+            loadPage(settings['page_index']);
             moveToTop();
         }
         function lastPage() {
-            page_index = sources.length-1;
-            loadPage(page_index);
+            settings['page_index'] = settings['sources'].length-1;
+            loadPage(settings['page_index']);
             moveToBottom();
         }
         
         function setDisplayMode(mode) {}
         function setZoomMode(mode) {
-            if (mode) zoom_mode = mode;
+            if (mode) settings['zoom_mode'] = mode;
 
-            if (zoom_mode == 'origin') {
+            if (settings['zoom_mode'] == 'origin') {
                 image_width = image_original_width;
                 image_height = image_original_height;
 
-            } else if (zoom_mode == 'horizontal') {
+            } else if (settings['zoom_mode'] == 'horizontal') {
                 factor = screen_width/image_original_width;
                 image_width = screen_width;
                 image_height = image_original_height*factor;
 
-            } else if (zoom_mode == 'vertical') {
+            } else if (settings['zoom_mode'] == 'vertical') {
                 factor = screen_height/image_original_height;
                 image_width = image_original_width*factor;
                 image_height = screen_height;

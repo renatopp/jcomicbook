@@ -19,7 +19,7 @@ html, body {
     opacity: 0.9;
 }
 #comicmenu img {
-    width:50px;
+    width:35px;
     border:none;
 }
 ul.comicmenu {
@@ -29,5 +29,5 @@ ul.comicmenu {
 }
 ul.comicmenu li {
     list-style:none;
-    display: block;
+    display: inline;
 }
