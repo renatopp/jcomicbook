@@ -157,8 +157,6 @@
             page.onload = function() {
                 image_original_height = page.height;
                 image_original_width = page.width;
-                image_height = image_original_height;
-                image_width = image_original_width;
                 setZoomMode();
                 draw();
             };
@@ -264,36 +262,67 @@
         function setZoomMode(mode) {
             if (mode) settings['zoom_mode'] = mode;
 
-            if (settings['zoom_mode'] == 'origin') {
-                image_width = image_original_width;
+            if (settings['zoom_mode'] != 'manual') {
                 image_height = image_original_height;
+                image_width = image_original_width;
 
-            } else if (settings['zoom_mode'] == 'horizontal') {
-                factor = screen_width/image_original_width;
-                image_width = screen_width;
-                image_height = image_original_height*factor;
+                if (settings['zoom_mode'] == 'origin') {
+                    image_width = image_original_width;
+                    image_height = image_original_height;
 
-            } else if (settings['zoom_mode'] == 'vertical') {
-                factor = screen_height/image_original_height;
-                image_width = image_original_width*factor;
-                image_height = screen_height;
-            }
+                } else if (settings['zoom_mode'] == 'horizontal') {
+                    factor = screen_width/image_original_width;
+                    image_width = screen_width;
+                    image_height = image_original_height*factor;
 
-            if (image_width > screen_width) {
-                page_x = 0;
+                } else if (settings['zoom_mode'] == 'vertical') {
+                    factor = screen_height/image_original_height;
+                    image_width = image_original_width*factor;
+                    image_height = screen_height;
+                }
+
+                settings['zoom_factor'] = image_width/image_original_width;
+
+                if (image_width > screen_width) {
+                    page_x = 0;
+                } else {
+                    page_x = getCenterX();
+                }
+
+                if (image_height > screen_height) {
+                    page_y = 0;
+                } else {
+                    page_y = getCenterY();
+                }
             } else {
-                page_x = getCenterX();
-            }
+                image_width = image_original_width*settings['zoom_factor'];
+                image_height = image_original_height*settings['zoom_factor'];
 
-            if (image_height > screen_height) {
-                page_y = 0;
-            } else {
-                page_y = getCenterY();
+                if (image_width <= screen_width) {
+                    page_x = getCenterX();
+                } else {
+                    if (isLeft()) moveToLeft();
+                    else if (isRight()) moveToRight();
+                }
+
+                if (image_height <= screen_height) {
+                    page_y = getCenterY();
+                } else {
+                    if (isTop()) moveToTop();
+                    else if (isBottom()) moveToBottom();
+                }
             }
         }
 
-        function zoomIn() {}
-        function zoomOut() {}
+        function zoomIn() {
+            settings['zoom_factor'] += 0.1;
+            setZoomMode('manual');
+        }
+
+        function zoomOut() {
+            settings['zoom_factor'] -= 0.1;
+            setZoomMode('manual');   
+        }
 
         init();
     };
