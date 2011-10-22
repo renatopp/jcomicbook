@@ -35,3 +35,14 @@ ul.comicmenu li {
     list-style:none;
     display: inline;
 }
+
+.page {
+    background: #000;
+    color: #f3f3f3;
+    display: inline;
+    padding: 6px;
+    position: relative;
+    top:-12px;
+
+    
+}
