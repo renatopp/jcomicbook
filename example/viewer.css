@@ -4,6 +4,10 @@ html, body {
   margin: 0px;
 }
 
+#comicview {
+    height:99.6%;
+    width:100%;
+}
 #comicmenu {
     position: absolute;
     top: 0px;

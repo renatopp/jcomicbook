@@ -5,9 +5,11 @@
             'display-mode'     : 'single',
             'zoom_mode'        : 'origin',
             'zoom_factor'      : 1,
-            'background-color' : '#f1f1f1',
+            'background-color' : '#eaeaea',
             'roll_sensibility' : 250,
+            'mouse_sensibility': 1,
             'sources'          : [
+                //"hellblazer/dual.jpg",
                 "hellblazer/Hellblazer_001-01.jpg",
                 "hellblazer/Hellblazer_001-02.jpg",
                 "hellblazer/Hellblazer_001-03.jpg"],
@@ -21,19 +23,24 @@
         var screen_width, screen_height;
         var page_x, page_y, page;
         var comic_view, canvas, context;
-        
+        var mouse_status, mouse_x, mouse_y;
+
         comic_view = this;
         canvas = document.getElementById(this.attr('id'));
         context = canvas.getContext('2d');
 
         function init() {
             $(document).bind('keydown', keyboardEventDispatch);
+            canvas.addEventListener('mousedown', mouseEventDispatch, false);
+            canvas.addEventListener('mousemove', mouseEventDispatch, false);
+            canvas.addEventListener('mouseup', mouseEventDispatch, false);
             window.addEventListener('DOMMouseScroll', scrollEventDispatch, false);
             window.onmousewheel = scrollEventDispatch;
 
             page_x = 0;
             page_y = 0;
             delay_flag = false;
+            mouse_status = 'up';
             resizeWindow();
             setDisplayMode(settings['display_mode'])
             setZoomMode(settings['zoom_mode']);
@@ -84,6 +91,54 @@
             else if (event.which == 51 || event.which == 99) { setZoomMode('origin'); } // 3
             else if (event.which == 107) { zoomIn(); } // +
             else if (event.which == 109) { zoomOut(); } // -
+
+            draw();
+        }
+
+        function mouseEventDispatch(event) {
+            if (event.layerX || event.layerX == 0) { // Firefox
+                actual_mouse_x = event.layerX;
+                actual_mouse_y = event.layerY;
+            } else if (event.offsetX || event.offsetX == 0) { // Opera
+                actual_mouse_x = event.offsetX;
+                actual_mouse_y = event.offsetY;
+            }
+
+            if (event.type == 'mousedown') {
+                mouse_status = 'down'
+                mouse_x = actual_mouse_x;
+                mouse_y = actual_mouse_y;
+            } else if (event.type == 'mousemove') {
+                if (mouse_status == 'down') {
+                    delta_y = (actual_mouse_y-mouse_y)*settings['mouse_sensibility'];
+                    delta_x = (actual_mouse_x-mouse_x)*settings['mouse_sensibility'];
+
+                    if (image_height > screen_height) {
+                        if (delta_y > 0 && !isTop()) {
+                            page_y += delta_y;
+                            if (isTop()) moveToTop();
+                        } else if (delta_y < 0 && !isBottom()) {
+                            page_y += delta_y;
+                            if (isBottom()) moveToBottom();
+                        }
+                    }
+
+                    if (image_width > screen_width) {
+                        if (delta_x > 0 && !isLeft()) {
+                            page_x += delta_x;
+                            if (isLeft()) moveToLeft();
+                        } else if (delta_x < 0 && !isRight()) {
+                            page_x += delta_x;
+                            if (isRight()) moveToRight();
+                        }
+                    }
+                }
+            } else if (event.type == 'mouseup') {
+                mouse_status = 'up'
+            }
+
+            mouse_x = actual_mouse_x;
+            mouse_y = actual_mouse_y;
 
             draw();
         }
