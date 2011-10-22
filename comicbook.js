@@ -5,10 +5,9 @@
             'display-mode'     : 'single',
             'zoom_mode'        : 'origin',
             'zoom_factor'      : 1,
-            'background-color' : '#fff',
+            'background-color' : '#f1f1f1',
+            'roll_sensibility' : 250,
             'sources'          : [
-                // "hellblazer/dual.jpg",
-                // "hellblazer/small.jpg",
                 "hellblazer/Hellblazer_001-01.jpg",
                 "hellblazer/Hellblazer_001-02.jpg",
                 "hellblazer/Hellblazer_001-03.jpg"],
@@ -16,6 +15,7 @@
         };
 
         $.extend(settings, options);
+
         //var data = $.extend({}, settings, options);
         var image_original_height, image_original_width, image_height, image_width;
         var screen_width, screen_height;
@@ -33,6 +33,7 @@
 
             page_x = 0;
             page_y = 0;
+            delay_flag = false;
             resizeWindow();
             setDisplayMode(settings['display_mode'])
             setZoomMode(settings['zoom_mode']);
@@ -73,7 +74,7 @@
             else if (event.which == 40) { (isBottom())?nextPage():rollDown(); } // <DOWN>
             else if (event.which == 39) { (isRight())?nextPage():rollRight(); } // <RIGHT>
             else if (event.which == 37) { (isLeft())?previousPage():rollLeft(); } // <LEFT>
-            else if (event.which == 32) { moveToBottom(); } // SPACE
+            else if (event.which == 32) { (isBottom())?nextPage():moveToBottom(); } // SPACE
             else if (event.which == 33) { previousPage(); } // PG UP
             else if (event.which == 34) { nextPage(); } // PG DOWN
             else if (event.which == 36) { firstPage(); } // HOME
@@ -89,6 +90,8 @@
 
         function draw() {
             resizeWindow();
+            context.fillStyle = settings['background-color'];
+            context.fillRect(0, 0, screen_width+5, screen_height+5);
             context.drawImage(page, page_x, page_y, image_width, image_height);
         }
 
@@ -143,7 +146,7 @@
         
         function rollUp() { 
             if (image_height > screen_height) {
-                page_y += 250;
+                page_y += settings['roll_sensibility'];
                 if (isTop()) {
                     moveToTop();
                 }
@@ -151,7 +154,7 @@
         }
         function rollDown() {
             if (image_height > screen_height) {
-                page_y -= 250;
+                page_y -= settings['roll_sensibility'];
                 if (isBottom()) {
                     moveToBottom();
                 }
@@ -159,7 +162,7 @@
         }
         function rollRight() { 
             if (image_width > screen_width) { 
-                page_x -= 250;
+                page_x -= settings['roll_sensibility'];
                 if (isRight()) {
                     moveToRight();
                 }
@@ -167,7 +170,7 @@
         }
         function rollLeft() { 
             if (image_width > screen_width) { 
-                page_x += 250; 
+                page_x += settings['roll_sensibility']; 
                 if (isLeft()) {
                     moveToLeft();
                 }
